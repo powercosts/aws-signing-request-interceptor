@@ -1,9 +1,7 @@
 package vc.inreach.aws.request;
 
 import com.google.common.base.*;
-import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import org.apache.http.*;
 import org.apache.http.client.methods.HttpRequestWrapper;
@@ -11,7 +9,9 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.nio.charset.StandardCharsets;
@@ -38,16 +38,16 @@ public class AWSSigningRequestInterceptor implements HttpRequestInterceptor {
         ));
     }
 
-    private Multimap<String, String> params(HttpRequest request) throws IOException {
+    private Map<String, List<String>> params(HttpRequest request) throws IOException {
         final String rawQuery = ((HttpRequestWrapper) request).getURI().getRawQuery();
         if (Strings.isNullOrEmpty(rawQuery))
-            return ImmutableListMultimap.of();
+            return new HashMap<>();
 
         return params(URLDecoder.decode(rawQuery, StandardCharsets.UTF_8.name()));
     }
 
-    private Multimap<String, String> params(String query) {
-        final ImmutableListMultimap.Builder<String, String> queryParams = ImmutableListMultimap.builder();
+    private Map<String, List<String>> params(String query) {
+        final Map<String, List<String>> queryParams = new HashMap<>();
 
         if (! Strings.isNullOrEmpty(query)) {
             for (String pair : SPLITTER.split(query)) {
@@ -55,14 +55,24 @@ public class AWSSigningRequestInterceptor implements HttpRequestInterceptor {
                 if (index > 0) {
                     final String key = pair.substring(0, index);
                     final String value = pair.substring(index + 1);
-                    queryParams.put(key, value);
+                    List<String> existingValues = queryParams.get(key);
+                    if (existingValues == null) {
+                        existingValues = new ArrayList<>();
+                    }
+                    existingValues.add(value);
+                    queryParams.put(key, existingValues);
                 } else {
-                    queryParams.put(pair, "");
+                    List<String> existingValues = queryParams.get(pair);
+                    if (existingValues == null) {
+                        existingValues = new ArrayList<>();
+                    }
+                    existingValues.add("");
+                    queryParams.put(pair, existingValues);
                 }
             }
         }
 
-        return queryParams.build();
+        return queryParams;
     }
 
     private String path(HttpRequest request) {
@@ -79,12 +89,14 @@ public class AWSSigningRequestInterceptor implements HttpRequestInterceptor {
         return headers.build();
     }
 
-    private Optional<byte[]> body(HttpRequest request) throws IOException {
+    private java.util.Optional<byte[]> body(HttpRequest request) throws IOException {
         final HttpRequest original = ((HttpRequestWrapper) request).getOriginal();
         if (! HttpEntityEnclosingRequest.class.isAssignableFrom(original.getClass())) {
-            return Optional.absent();
+            return java.util.Optional.empty();
         }
-        return Optional.fromNullable(((HttpEntityEnclosingRequest) original).getEntity()).transform(TO_BYTE_ARRAY);
+        java.util.Optional<HttpEntity> entity = java.util.Optional.of(((HttpEntityEnclosingRequest) original).getEntity());
+
+        return entity.map(TO_BYTE_ARRAY::apply);
     }
 
     private Header[] headers(Map<String, Object> from) {

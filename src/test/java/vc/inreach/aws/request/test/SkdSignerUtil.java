@@ -68,7 +68,7 @@ public class SkdSignerUtil {
         private String body = "";
         private String httpMethod;
         private Map<String, Object> headers;
-        private Multimap<String, String> queryParams;
+        private Map<String, List<String>> queryParams;
         private AWSCredentialsProvider credentialsProvider;
 
         public String getServiceName() {
@@ -127,10 +127,10 @@ public class SkdSignerUtil {
             this.headers = headers;
             return this;
         }
-        public Multimap<String, String> getQueryParams() {
+        public Map<String, List<String>> getQueryParams() {
             return queryParams;
         }
-        public Request setQueryParams(Multimap<String, String> queryParams) {
+        public Request setQueryParams(Map<String, List<String>> queryParams) {
             this.queryParams = queryParams;
             return this;
         }

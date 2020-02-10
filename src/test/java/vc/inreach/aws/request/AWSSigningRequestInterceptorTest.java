@@ -1,8 +1,6 @@
 package vc.inreach.aws.request;
 
-import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Multimap;
 import org.apache.http.Header;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.methods.HttpRequestWrapper;
@@ -15,6 +13,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.net.URI;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Mockito.*;
@@ -39,30 +41,31 @@ public class AWSSigningRequestInterceptorTest {
     @Test
     public void noQueryParams() throws Exception {
         final String url = "http://someurl.com";
-        final Multimap<String, String> queryParams = ImmutableListMultimap.of();
+        final Map<String, List<String>> queryParams = new HashMap<>();
 
-        when(signer.getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(com.google.common.base.Optional.class))).thenReturn(ImmutableMap.of());
+        when(signer.getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(java.util.Optional.class))).thenReturn(ImmutableMap.of());
         mockRequest(url);
 
         interceptor.process(request, context);
 
         verify(request).setHeaders(new Header[]{});
-        verify(signer).getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(com.google.common.base.Optional.class));
+        verify(signer).getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(java.util.Optional.class));
     }
 
 
     @Test
     public void queryParamsSupportValuesWithSpaceEncodedAsPlus() throws Exception {
         final String url = "http://someurl.com?a=b+c";
-        final Multimap<String, String> queryParams = ImmutableListMultimap.of("a", "b c");
+        final Map<String, List<String>> queryParams = new HashMap<>();
+        queryParams.put("a", Collections.singletonList("b c"));
 
-        when(signer.getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(com.google.common.base.Optional.class))).thenReturn(ImmutableMap.of());
+        when(signer.getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(java.util.Optional.class))).thenReturn(ImmutableMap.of());
         mockRequest(url);
 
         interceptor.process(request, context);
 
         verify(request).setHeaders(new Header[]{});
-        verify(signer).getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(com.google.common.base.Optional.class));
+        verify(signer).getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(java.util.Optional.class));
     }
 
     @Test
@@ -70,45 +73,48 @@ public class AWSSigningRequestInterceptorTest {
         final String key = "scroll_id";
         final String value = "c2NhbjsxOzc3Mjo5WGljUUFNeVJGcVdDSzBjaUVQcDJ3OzE7dG90YWxfaGl0czo1NTg0Ow==";
         final String url = "http://someurl.com?" + key + "=" + value;
-        final Multimap<String, String> queryParams = ImmutableListMultimap.of(key, value);
+        final Map<String, List<String>> queryParams = new HashMap<>();
+        queryParams.put(key, Collections.singletonList(value));
 
-        when(signer.getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(com.google.common.base.Optional.class))).thenReturn(ImmutableMap.of());
+        when(signer.getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(java.util.Optional.class))).thenReturn(ImmutableMap.of());
         mockRequest(url);
 
         interceptor.process(request, context);
 
         verify(request).setHeaders(new Header[]{});
-        verify(signer).getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(com.google.common.base.Optional.class));
+        verify(signer).getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(java.util.Optional.class));
     }
 
     @Test
     public void queryParamsSupportValuesWithoutEquals() throws Exception {
         final String key = "scroll_id";
         final String url = "http://someurl.com?" + key;
-        final Multimap<String, String> queryParams = ImmutableListMultimap.of(key, "");
+        final Map<String, List<String>> queryParams = new HashMap<>();
+        queryParams.put(key, Collections.singletonList(""));
 
-        when(signer.getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(com.google.common.base.Optional.class))).thenReturn(ImmutableMap.of());
+        when(signer.getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(java.util.Optional.class))).thenReturn(ImmutableMap.of());
         mockRequest(url);
 
         interceptor.process(request, context);
 
         verify(request).setHeaders(new Header[]{});
-        verify(signer).getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(com.google.common.base.Optional.class));
+        verify(signer).getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(java.util.Optional.class));
     }
 
     @Test
     public void queryParamsSupportEmptyValues() throws Exception {
         final String key = "a";
         final String url = "http://someurl.com?" + key + "=";
-        final Multimap<String, String> queryParams = ImmutableListMultimap.of(key, "");
+        final Map<String, List<String>> queryParams = new HashMap<>();
+        queryParams.put(key, Collections.singletonList(""));
 
-        when(signer.getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(com.google.common.base.Optional.class))).thenReturn(ImmutableMap.of());
+        when(signer.getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(java.util.Optional.class))).thenReturn(ImmutableMap.of());
         mockRequest(url);
 
         interceptor.process(request, context);
 
         verify(request).setHeaders(new Header[]{});
-        verify(signer).getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(com.google.common.base.Optional.class));
+        verify(signer).getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(java.util.Optional.class));
     }
 
     @Test
@@ -116,15 +122,16 @@ public class AWSSigningRequestInterceptorTest {
         final String key = "a";
         final String value = "b";
         final String url = "http://someurl.com?" + key + "=" + value + "&";
-        final Multimap<String, String> queryParams = ImmutableListMultimap.of(key, value);
+        final Map<String, List<String>> queryParams = new HashMap<>();
+        queryParams.put(key, Collections.singletonList(value));
 
-        when(signer.getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(com.google.common.base.Optional.class))).thenReturn(ImmutableMap.of());
+        when(signer.getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(java.util.Optional.class))).thenReturn(ImmutableMap.of());
         mockRequest(url);
 
         interceptor.process(request, context);
 
         verify(request).setHeaders(new Header[]{});
-        verify(signer).getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(com.google.common.base.Optional.class));
+        verify(signer).getSignedHeaders(anyString(), anyString(), eq(queryParams), anyMapOf(String.class, Object.class), any(java.util.Optional.class));
     }
 
     private void mockRequest(String url) throws Exception {

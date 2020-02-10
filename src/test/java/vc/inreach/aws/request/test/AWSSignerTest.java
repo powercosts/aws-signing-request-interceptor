@@ -1,22 +1,23 @@
 package vc.inreach.aws.request.test;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Supplier;
+
+import org.junit.Test;
+
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.internal.StaticCredentialsProvider;
-import com.google.common.base.Optional;
-import com.google.common.base.Supplier;
-import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Multimap;
-import org.junit.Test;
 import vc.inreach.aws.request.AWSSigner;
-
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.TreeMap;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,13 +53,12 @@ public class AWSSignerTest {
         String host = "host.foo.com";
         String uri = "/";
         String method = "GET";
-        Multimap<String, String> queryParams = ImmutableListMultimap.<String, String>builder()
-                .build();
+        Map<String, List<String>> queryParams = new HashMap<>();
         Map<String, Object> headers = ImmutableMap.<String, Object>builder()
                 .put("Date", date)
                 .put("Host", host + ":80")
                 .build();
-        Optional<byte[]> payload = Optional.absent();
+        java.util.Optional<byte[]> payload = java.util.Optional.empty();
 
         // WHEN
         // The request is signed
@@ -114,14 +114,13 @@ public class AWSSignerTest {
         String host = "host.foo.com";
         String uri = "/";
         String method = "POST";
-        Multimap<String, String> queryParams = ImmutableListMultimap.<String, String>builder()
-                .put("foo", "bar")
-                .build();
+        Map<String, List<String>> queryParams = new HashMap<>();
+        queryParams.put("foo", Collections.singletonList("bar"));
         Map<String, Object> headers = ImmutableMap.<String, Object>builder()
                 .put("Date", date)
                 .put("Host", host)
                 .build();
-        Optional<byte[]> payload = Optional.absent();
+        java.util.Optional<byte[]> payload = java.util.Optional.empty();
 
         // WHEN
         // The request is signed
@@ -171,8 +170,7 @@ public class AWSSignerTest {
         String host = "example.amazonaws.com";
         String uri = "/index_name/type_name/joe@example.com";
         String method = "PUT";
-        Multimap<String, String> queryParams = ImmutableListMultimap.<String, String>builder()
-                .build();
+        Map<String, List<String>> queryParams = new HashMap<>();
         Map<String, Object> headers = ImmutableMap.<String, Object>builder()
                 .put("X-Amz-Date", date)
                 .put("Host", host)
@@ -182,7 +180,7 @@ public class AWSSignerTest {
                 + "    \"post_date\" : \"2009-11-15T14:12:12\",\n"
                 + "    \"message\" : \"trying out Elasticsearch\"\n"
                 + "}";
-        Optional<byte[]> payload = Optional.of(body.getBytes("utf-8"));
+        java.util.Optional<byte[]> payload = java.util.Optional.of(body.getBytes("utf-8"));
 
         String expectedAuthorizationHeader = SkdSignerUtil.getExpectedAuthorizationHeader(
                 new SkdSignerUtil.Request()
@@ -235,8 +233,7 @@ public class AWSSignerTest {
         String host = "example.amazonaws.com";
         String uri = "/index_name/type_name/joe%40example.com";
         String method = "PUT";
-        Multimap<String, String> queryParams = ImmutableListMultimap.<String, String>builder()
-                .build();
+        Map<String, List<String>> queryParams = new HashMap<>();
         Map<String, Object> headers = ImmutableMap.<String, Object>builder()
                 .put("X-Amz-Date", date)
                 .put("Host", host)
@@ -246,7 +243,7 @@ public class AWSSignerTest {
                 + "    \"post_date\" : \"2009-11-15T14:12:12\",\n"
                 + "    \"message\" : \"trying out Elasticsearch\"\n"
                 + "}";
-        Optional<byte[]> payload = Optional.of(body.getBytes("utf-8"));
+        java.util.Optional<byte[]> payload = java.util.Optional.of(body.getBytes("utf-8"));
 
         String expectedAuthorizationHeader = SkdSignerUtil.getExpectedAuthorizationHeader(
                 new SkdSignerUtil.Request()
@@ -295,12 +292,11 @@ public class AWSSignerTest {
         String host = "host.foo.com";
         String uri = "/";
         String method = "GET";
-        Multimap<String, String> queryParams = ImmutableListMultimap.<String, String>builder()
-                .build();
+        Map<String, List<String>> queryParams = new HashMap<>();
         Map<String, Object> headers = ImmutableMap.<String, Object>builder()
                 .put("Host", host)
                 .build();
-        Optional<byte[]> payload = Optional.absent();
+        java.util.Optional<byte[]> payload = java.util.Optional.empty();
 
         // WHEN
         // The request is signed
@@ -347,13 +343,12 @@ public class AWSSignerTest {
         String host = "host.foo.com";
         String uri = "/";
         String method = "GET";
-        Multimap<String, String> queryParams = ImmutableListMultimap.<String, String>builder()
-                .build();
+        Map<String, List<String>> queryParams = new HashMap<>();
         Map<String, Object> headers = ImmutableMap.<String, Object>builder()
                 .put("Date", date)
                 .put("Host", host)
                 .build();
-        Optional<byte[]> payload = Optional.absent();
+        java.util.Optional<byte[]> payload = java.util.Optional.empty();
 
         // WHEN
         // The request is signed
@@ -401,14 +396,13 @@ public class AWSSignerTest {
         String host = "host.foo.com";
         String uri = "/";
         String method = "GET";
-        Multimap<String, String> queryParams = ImmutableListMultimap.<String, String>builder()
-                .put("scrollId", "dGVzdA===")
-                .build();
+        Map<String, List<String>> queryParams = new HashMap<>();
+        queryParams.put("scrollId", Collections.singletonList("dGVzdA==="));
         Map<String, Object> headers = ImmutableMap.<String, Object>builder()
                 .put("Date", date)
                 .put("Host", host + ":80")
                 .build();
-        Optional<byte[]> payload = Optional.absent();
+        java.util.Optional<byte[]> payload = java.util.Optional.empty();
 
         // WHEN
         // The request is signed
@@ -454,14 +448,13 @@ public class AWSSignerTest {
         String host = "host.foo.com";
         String uri = "/";
         String method = "GET";
-        Multimap<String, String> queryParams = ImmutableListMultimap.<String, String>builder()
-                .put("_query", "ben*")
-                .build();
+        Map<String, List<String>> queryParams = new HashMap<>();
+        queryParams.put("_query", Collections.singletonList("ben*"));
         Map<String, Object> headers = ImmutableMap.<String, Object>builder()
                 .put("Date", date)
                 .put("Host", host + ":80")
                 .build();
-        Optional<byte[]> payload = Optional.absent();
+        java.util.Optional<byte[]> payload = java.util.Optional.empty();
 
         // WHEN
         // The request is signed
@@ -516,13 +509,12 @@ public class AWSSignerTest {
         String host = "example.amazonaws.com";
         String uri = "/ሴ";
         String method = "GET";
-        Multimap<String, String> queryParams = ImmutableListMultimap.<String, String>builder()
-                .build();
+        Map<String, List<String>> queryParams = new HashMap<>();
         Map<String, Object> headers = ImmutableMap.<String, Object>builder()
                 .put("Host", host)
                 .put("X-Amz-Date", date)
                 .build();
-        Optional<byte[]> payload = Optional.absent();
+        java.util.Optional<byte[]> payload = java.util.Optional.empty();
 
         String expectedAuthorizationHeader = "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/service/aws4_request, SignedHeaders=host;x-amz-date, Signature=8318018e0b0f223aa2bbf98705b62bb787dc9c0e678f255a891fd03141be5d85";
 

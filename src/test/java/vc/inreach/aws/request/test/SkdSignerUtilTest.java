@@ -12,6 +12,9 @@ import org.junit.Test;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -103,9 +106,9 @@ public class SkdSignerUtilTest {
         String host = "example.amazonaws.com";
         String uri = "/";
         String method = "POST";
-        Multimap<String, String> queryParams = ImmutableListMultimap.<String, String>builder()
-                .put("Param1", "value1")
-                .build();
+        Map<String, List<String>> queryParams = new HashMap<>();
+        queryParams.put("Param1", Collections.singletonList("value1"));
+
         Map<String, Object> headers = ImmutableMap.<String, Object>builder()
                 .put("X-Amz-Date", date)
                 .put("Host", host)

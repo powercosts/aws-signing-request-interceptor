@@ -7,9 +7,6 @@ import com.amazonaws.util.SdkHttpUtils;
 import com.google.common.base.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Multimap;
-import com.google.common.escape.Escaper;
-import com.google.common.net.UrlEscapers;
 import org.apache.commons.codec.binary.Hex;
 
 import javax.crypto.Mac;
@@ -18,12 +15,10 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -75,7 +70,7 @@ public class AWSSigner {
     private final AWSCredentialsProvider credentialsProvider;
     private final String region;
     private final String service;
-    private final Supplier<LocalDateTime> clock;
+    private final java.util.function.Supplier<LocalDateTime> clock;
     private static final DateTimeFormatter BASIC_ISO_DATE;
     static {
         BASIC_ISO_DATE = new DateTimeFormatterBuilder()
@@ -88,7 +83,7 @@ public class AWSSigner {
     public AWSSigner(AWSCredentialsProvider credentialsProvider,
                      String region,
                      String service,
-                     Supplier<LocalDateTime> clock) {
+                     java.util.function.Supplier<LocalDateTime> clock) {
         this.credentialsProvider = credentialsProvider;
         this.region = region;
         this.service = service;
@@ -97,9 +92,9 @@ public class AWSSigner {
 
     public Map<String, Object> getSignedHeaders(String uri,
                                                 String method,
-                                                Multimap<String, String> queryParams,
+                                                Map<String, List<String>> queryParams,
                                                 Map<String, Object> headers,
-                                                Optional<byte[]> payload) {
+                                                java.util.Optional<byte[]> payload) {
         final LocalDateTime now = clock.get();
         final AWSCredentials credentials = credentialsProvider.getCredentials();
         final Map<String, Object> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -134,7 +129,7 @@ public class AWSSigner {
                 queryParamsString(queryParams) + RETURN +
                 headersString.toString() + RETURN +
                 signedHeaderKeys + RETURN +
-                toBase16(hash(payload.or(EMPTY.getBytes(Charsets.UTF_8))));
+                toBase16(hash(payload.orElse(EMPTY.getBytes(Charsets.UTF_8))));
         final String stringToSign = createStringToSign(canonicalRequest, now);
         final String signature = sign(stringToSign, now, credentials);
         final String autorizationHeader = AWS4_HMAC_SHA256_CREDENTIAL + credentials.getAWSAccessKeyId() + SLASH + getCredentialScope(now) +
@@ -145,9 +140,9 @@ public class AWSSigner {
         return ImmutableMap.copyOf(result);
     }
 
-    private String queryParamsString(Multimap<String, String> queryParams) {
+    private String queryParamsString(Map<String, List<String>> queryParams) {
         final ImmutableList.Builder<String> result = ImmutableList.builder();
-        for (Map.Entry<String, Collection<String>> param : new TreeMap<>(queryParams.asMap()).entrySet()) {
+        for (Map.Entry<String, List<String>> param : new TreeMap<>(queryParams).entrySet()) {
             for (String value : param.getValue()) {
                 result.add(SdkHttpUtils.urlEncode(param.getKey(), false) + '=' + SdkHttpUtils.urlEncode(value, false));
             }
